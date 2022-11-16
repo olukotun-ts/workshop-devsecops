@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>AWS Roles and Permissions on My New Hugo Site</title>
+    <link>http://example.org/chapters/3-adding-aws/roles-permissions/</link>
+    <description>Recent content in AWS Roles and Permissions on My New Hugo Site</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language><atom:link href="http://example.org/chapters/3-adding-aws/roles-permissions/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>OIDC Role</title>
+      <link>http://example.org/chapters/3-adding-aws/roles-permissions/oidc/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://example.org/chapters/3-adding-aws/roles-permissions/oidc/</guid>
+      <description>Create an IAM Role From the IAM dashboard, navigate to the Create role page by clicking Roles in the navigation pane then clicking the Create role button.
+In the section titled Trusted entity type, select Web identity; and in the section titled Web identity, use the dropdown menu to select the IdP you created in the preceding section.
+After selecting an IdP, use the Audience dropdown menu to select the audience you added in the preceding section.</description>
+    </item>
+    
+    <item>
+      <title>Cluster Service Role</title>
+      <link>http://example.org/chapters/3-adding-aws/roles-permissions/cluster/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://example.org/chapters/3-adding-aws/roles-permissions/cluster/</guid>
+      <description>Create a Cluster Service Role In the AWS Console, navigate to the IAM dashboard.
+From the IAM dashboard, navigate to the Create role page by clicking Roles in the navigation pane then clicking the Create role button.
+Select eks Select use case Click Next
+Create role </description>
+    </item>
+    
+  </channel>
+</rss>

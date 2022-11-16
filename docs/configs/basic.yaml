@@ -1,0 +1,148 @@
+version: 2.1
+
+orbs:
+  aws-cli: circleci/aws-cli@3.1.3
+  aws-ecr: circleci/aws-ecr@8.1.3
+  aws-eks: circleci/aws-eks@2.2.0
+  k8s: circleci/kubernetes@1.3.1
+  # slack: circleci/slack@4.10.1
+
+workflows:
+  build-test-deliver:
+    jobs:
+      - python-check-style
+      - python-security-scan:
+          context: cloudSecrets # Use snyk orb. Rename contexts
+      - python-unit-tests:
+          requires: [python-check-style, python-security-scan]
+      - python-build:
+          context: [reference-arch, reference-arch-aws]
+          requires: [python-unit-tests]
+          tag: build-<<pipeline.number>>
+      - python-deploy:
+          context: [reference-arch, reference-arch-aws, cera-boa-dev]
+          requires: [python-build]
+jobs:
+  python-deploy:
+    parameters:
+      service:
+        type: string
+      manifests-dir:
+        type: string
+        default: dev-kubernetes-manifests
+    executor: aws-ecr/default
+    steps:
+      - checkout
+      - k8s/install-kubectl
+      # https://github.com/CircleCI-Public/aws-cli-orb/blob/master/src/scripts/assume-role-with-web-identity.sh#L19
+      - aws-cli/setup:
+          aws-region: AWS_REGION
+          role-arn: $AWS_ROLE_ARN
+      - run:
+          name: Connect to cluster
+          command: |
+            aws eks update-kubeconfig --name $CLUSTER_NAME
+            kubectl get ns
+      - run:
+          name: Deploy service
+          command: |
+            kubectl apply -f <<parameters.manifests-dir>>/<<parameters.service>>.yaml -n $NAMESPACE
+            kubectl get pods -n $NAMESPACE
+  python-build:
+    parameters:
+      service:
+        type: string
+      tag:
+        type: string
+    executor: aws-ecr/default
+    steps:
+      - aws-ecr/build-and-push-image:
+          assume-web-identity: true
+          path: src/<<parameters.service>>
+          registry-id: AWS_ACCOUNT_ID
+          repo: cera-<<parameters.service>>
+          role-arn: $AWS_ROLE_ARN
+          skip-when-tags-exist: true
+          tag: <<parameters.tag>>
+  python-check-style:
+    executor: python38
+    resource_class: small
+    steps:
+      - checkout
+      - run:
+          name: Check style
+          command: |
+            pip install pylint
+            pylint --rcfile=./.pylintrc ./src/*/*.py
+  python-unit-tests:
+    parameters:
+      service:
+        type: string
+    executor: python38
+    parallelism: 4
+    steps:
+      - checkout
+      - restore_cache:
+          key: venv-<<parameters.service>>-{{ checksum "src/<<parameters.service>>/requirements.txt" }}
+      - run:
+          name: Create directory for test reports
+          command: mkdir test-reports
+      - run:
+          name: Run unit tests
+          command: |
+            cd src/<<parameters.service>>
+            source venv/bin/activate
+            pip install --upgrade pip
+            pip install -r requirements.txt
+            TEST_FILES=$(circleci tests glob "tests/test_*.py" | circleci tests split --split-by=timings)
+            python -m pytest --junit-xml=test-reports/<<parameters.service>>.xml -v -p no:warnings $TEST_FILES
+            deactivate
+      - save_cache:
+          key: venv-<<parameters.service>>-{{ checksum "src/<<parameters.service>>/requirements.txt" }}
+          paths: [src/<<parameters.service>>/venv]
+      - store_test_results:
+          path: src/<<parameters.service>>/test-reports
+      - store_artifacts:
+          path: src/<<parameters.service>>/test-reports
+  python-security-scan:
+    parameters:
+      service:
+        type: string
+    executor: python38
+    steps:
+      - checkout
+      - run:
+          name: Install Snyk CLI
+          command: |
+            if [[ ! -x "/usr/local/bin/snyk" ]]; then
+              LATEST_SNYK_CLI_VERSION=$(curl https://static.snyk.io/cli/latest/version)
+              echo "Downloading Snyk CLI version ${LATEST_SNYK_CLI_VERSION}"
+              curl -sO --retry 6 https://static.snyk.io/cli/v${LATEST_SNYK_CLI_VERSION}/snyk-linux
+              curl -sO --retry 6 https://static.snyk.io/cli/v${LATEST_SNYK_CLI_VERSION}/snyk-linux.sha256
+              sha256sum -c snyk-linux.sha256
+              sudo mv snyk-linux /usr/local/bin/snyk
+              sudo chmod +x /usr/local/bin/snyk
+            fi
+
+            snyk config set disableSuggestions=true
+            snyk auth $SNYK_TOKEN
+      - restore_cache:
+          key: venv-<<parameters.service>>-{{ checksum "src/<<parameters.service>>/requirements.txt" }}
+      - run:
+          name: Scan Python projects
+          command: |
+            cd src/<<parameters.service>>
+            mkdir vulnerabilities
+            echo "Installing dependencies for <<parameters.service>>"
+            python3 -m venv venv
+            source venv/bin/activate
+            pip install --upgrade pip
+            pip install -r requirements.txt
+            echo "Scanning <<parameters.service>>"
+            snyk test --file=requirements.txt --json-file-output=vulnerabilities/<<parameters.service>>.json --severity-threshold=high 
+            deactivate
+      - save_cache:
+          key: venv-<<parameters.service>>-{{ checksum "src/<<parameters.service>>/requirements.txt" }}
+          paths: [src/<<parameters.service>>/venv]
+      - store_artifacts:
+          path: src/<<parameters.service>>/vulnerabilities
