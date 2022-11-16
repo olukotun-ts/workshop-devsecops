@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Adding AWS on My New Hugo Site</title>
+    <link>http://example.org/chapters/3-adding-aws/</link>
+    <description>Recent content in Adding AWS on My New Hugo Site</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language><atom:link href="http://example.org/chapters/3-adding-aws/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Eks</title>
+      <link>http://example.org/chapters/3-adding-aws/eks/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://example.org/chapters/3-adding-aws/eks/</guid>
+      <description>Set up EKS</description>
+    </item>
+    
+    <item>
+      <title>ECR</title>
+      <link>http://example.org/chapters/3-adding-aws/ecr/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://example.org/chapters/3-adding-aws/ecr/</guid>
+      <description>To create an ECR repo for your images, navigate to the ECR dashboard in the AWS console.
+In the ECR dashboard, click Create repository.
+On the Create repository page, enter a name for the repository.
+After naming the repository, scroll down to the section titled Image scan settings and click the toggle to enable Scan on push.
+TIP: Configuring registry-level scan settings.
+At the bottom of the page, click on the button to Create repository.</description>
+    </item>
+    
+    <item>
+      <title>OpenID Connect</title>
+      <link>http://example.org/chapters/3-adding-aws/oidc/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://example.org/chapters/3-adding-aws/oidc/</guid>
+      <description>TIP: What is OIDC? Why use it? Add a context to the job
+what is a context? Set up OIDC In AWS, navigate to the IAM console.
+In the navigation pane on the left side of the screen, click Identity providers.
+In the next window, click Add provider.
+To configure the provider, start by selecting the option for OpenID Connect.
+The provider URL is in this format: https://oidc.circleci.com/org/ORGANIZATION_ID, where ORGANIZATION_ID refers to the organization you used to sign in to CircleCI.</description>
+    </item>
+    
+    <item>
+      <title>IAM Roles and Permissions</title>
+      <link>http://example.org/chapters/3-adding-aws/roles-permissions/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://example.org/chapters/3-adding-aws/roles-permissions/</guid>
+      <description>Creating an IAM Role From the IAM dashboard, navigate to the Create role page by clicking Roles in the navigation pane then clicking the Create role button.
+In the section titled Trusted entity type, select Web identity; and in the section titled Web identity, use the dropdown menu to select the IdP you created in the preceding section.
+After selecting an IdP, use the Audience dropdown menu to select the audience you added in the preceding section.</description>
+    </item>
+    
+  </channel>
+</rss>
